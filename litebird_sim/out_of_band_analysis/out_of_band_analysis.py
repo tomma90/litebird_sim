@@ -312,13 +312,17 @@ class HwpSysAndBandpass:
              Channel (:class:`.FreqChannelInfo`): an instance of the
                                                   :class:`.FreqChannelInfo` class
              maps (float): input maps (3, npix) coherent with nside provided.
-          """
+        """
 
-                
         # set defaults for band integration
         hwp_sys_Mbs_make_cmb = True
         hwp_sys_Mbs_make_fg = True
-        hwp_sys_Mbs_fg_models = ["pysm_synch_1", "pysm_freefree_1", "pysm_dust_1", "pysm_ame_1"]
+        hwp_sys_Mbs_fg_models = [
+            "pysm_synch_1",
+            "pysm_freefree_1",
+            "pysm_dust_1",
+            "pysm_ame_1",
+        ]
         hwp_sys_Mbs_gaussian_smooth = True
 
         # This part sets from parameter file
@@ -332,13 +336,13 @@ class HwpSysAndBandpass:
                 if "nside" in self.sim.parameter_file["general"].keys():
                     if self.sim.parameter_file["general"]["nside"] != self.nside:
                         print(
-                                "Warning!! nside from general "
-                                "(=%i) and hwp_sys (=%i) do not match. Using hwp_sys"
-                                % (
-                                    self.sim.parameter_file["general"]["nside"],
-                                    self.nside,
-                                )
+                            "Warning!! nside from general "
+                            "(=%i) and hwp_sys (=%i) do not match. Using hwp_sys"
+                            % (
+                                self.sim.parameter_file["general"]["nside"],
+                                self.nside,
                             )
+                        )
 
             self.integrate_in_band = paramdict.get("integrate_in_band", False)
             self.built_map_on_the_fly = paramdict.get("built_map_on_the_fly", False)
@@ -367,14 +371,17 @@ class HwpSysAndBandpass:
             self.band_filename = paramdict.get("band_filename", False)
             self.band_filename_solver = paramdict.get("band_filename_solver", False)
 
-            # here we set the values for Mbs used in the code if present in paramdict, otherwise defaults
+            # here we set the values for Mbs used in the code if present
+            # in paramdict, otherwise defaults
             hwp_sys_Mbs_make_cmb = paramdict.get("hwp_sys_Mbs_make_cmb", True)
             hwp_sys_Mbs_make_fg = paramdict.get("hwp_sys_Mbs_make_fg", True)
-            hwp_sys_Mbs_fg_models = paramdict.get("hwp_sys_Mbs_fg_models", ["pysm_synch_1", "pysm_freefree_1", "pysm_dust_1", "pysm_ame_1"])
+            hwp_sys_Mbs_fg_models = paramdict.get(
+                "hwp_sys_Mbs_fg_models",
+                ["pysm_synch_1", "pysm_freefree_1", "pysm_dust_1", "pysm_ame_1"],
+            )
             hwp_sys_Mbs_gaussian_smooth = paramdict.get(
-                 "hwp_sys_Mbs_gaussian_smooth", True
-             )
-
+                "hwp_sys_Mbs_gaussian_smooth", True
+            )
 
         # This part sets from input_parameters()
         if not self.nside:
@@ -404,47 +411,44 @@ class HwpSysAndBandpass:
 
         if Mbsparams is None:
             Mbsparams = lbs.MbsParameters(
-                    make_cmb=hwp_sys_Mbs_make_cmb,
-                    make_fg=hwp_sys_Mbs_make_fg,
-                    fg_models=hwp_sys_Mbs_fg_models,
-                    gaussian_smooth=hwp_sys_Mbs_gaussian_smooth,
-                    bandpass_int=False,
-                    maps_in_ecliptic=True,
-                    save = False,
-                    output_string= Channel.channel
-                )
+                make_cmb=hwp_sys_Mbs_make_cmb,
+                make_fg=hwp_sys_Mbs_make_fg,
+                fg_models=hwp_sys_Mbs_fg_models,
+                gaussian_smooth=hwp_sys_Mbs_gaussian_smooth,
+                bandpass_int=False,
+                maps_in_ecliptic=True,
+                save=False,
+                output_string=Channel.channel,
+            )
 
         Mbsparams.nside = self.nside
 
         self.npix = hp.nside2npix(self.nside)
 
-        
         if self.integrate_in_band:
             try:
                 self.freqs, self.h1, self.h2, self.beta, self.z1, self.z2 = np.loadtxt(
-                self.band_filename, unpack=True, skiprows = 1
-            )
-            except:
-                print('you have not provided a band_filename in the parameter file!')
+                    self.band_filename, unpack=True, skiprows=1
+                )
+            except Exception:
+                print("you have not provided a band_filename in the parameter file!")
 
             self.nfreqs = len(self.freqs)
 
             if not self.bandpass:
 
                 self.cmb2bb = _dBodTth(self.freqs)
-                
+
             elif self.bandpass:
-                    
-                self.freqs, self.bandpass_profile = bandpass_profile(self.freqs, 
-                                                                         self.bandpass,
-                                                                         self.include_beam_throughput)
-                                                                         
+
+                self.freqs, self.bandpass_profile = bandpass_profile(
+                    self.freqs, self.bandpass, self.include_beam_throughput
+                )
+
                 self.cmb2bb = _dBodTth(self.freqs) * self.bandpass_profile
-                    
-            
+
             # Normalize the band
             self.cmb2bb /= self.cmb2bb.sum()
-
 
             myinstr = {}
             for ifreq in range(self.nfreqs):
@@ -490,13 +494,19 @@ class HwpSysAndBandpass:
         if self.correct_in_solver:
             if self.integrate_in_band_solver:
                 try:
-                    self.freqs, self.h1s, self.h2s, self.betas, self.z1s, self.z2s = np.loadtxt(
-                    self.band_filename_solver,
-                    unpack=True,
-                    skiprows = 1
-                )
-                except:
-                    print('you have not provided a band_filename_solver in the parameter file!')
+                    (
+                        self.freqs,
+                        self.h1s,
+                        self.h2s,
+                        self.betas,
+                        self.z1s,
+                        self.z2s,
+                    ) = np.loadtxt(self.band_filename_solver, unpack=True, skiprows=1)
+                except Exception:
+                    print(
+                        "you have not provided a band_filename_solver"
+                        + "in the parameter file!"
+                    )
 
             else:
                 if not self.h1s:
@@ -509,17 +519,19 @@ class HwpSysAndBandpass:
                     self.z1s = 0.0
                 if not self.z2s:
                     self.z2s = 0.0
-            
+
             if not self.bandpass_solver:
 
                 self.cmb2bb_solver = _dBodTth(self.freqs)
 
             elif self.bandpass_solver:
-                    
-                self.freqs_solver, self.bandpass_profile_solver = bandpass_profile(self.freqs, 
-                                                                         self.bandpass_solver,
-                                                                         self.include_beam_throughput)
-                self.cmb2bb_solver = _dBodTth(self.freqs_solver) * self.bandpass_profile_solver
+
+                self.freqs_solver, self.bandpass_profile_solver = bandpass_profile(
+                    self.freqs, self.bandpass_solver, self.include_beam_throughput
+                )
+                self.cmb2bb_solver = (
+                    _dBodTth(self.freqs_solver) * self.bandpass_profile_solver
+                )
 
             self.cmb2bb_solver /= self.cmb2bb_solver.sum()
 
@@ -552,10 +564,7 @@ class HwpSysAndBandpass:
         for idet in range(obs.n_detectors):
             pix = hp.ang2pix(self.nside, pointings[idet, :, 0], pointings[idet, :, 1])
 
-            if self.built_map_on_the_fly:
-                tod = np.zeros_like(pointings[idet, :, 0])
-            else:
-                tod = obs.tod[idet, :]
+            tod = obs.tod[idet, :]
 
             if self.integrate_in_band:
                 integrate_in_band_signal_for_one_detector(
@@ -630,7 +639,7 @@ class HwpSysAndBandpass:
                     self.ata[pix, 2, 2] += 0.25 * sa * sa
                     del (ca, sa)
 
-                del tod
+            #    del tod
 
             else:
                 # this fills variables needed by bin_map
