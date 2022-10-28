@@ -644,7 +644,9 @@ class HwpSysAndBandpass:
 
             else:
                 # this fills variables needed by bin_map
-                obs.psi[idet, :] = pointings[idet, :, 2] + 2 * times * hwp_radpsec
+                obs.psi[idet, :] = np.array(
+                    pointings[idet, :, 2] + 2.0 * times * hwp_radpsec, dtype=np.float32
+                )
                 obs.pixind[idet, :] = pix
 
         return
