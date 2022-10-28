@@ -293,8 +293,9 @@ class HwpSys:
                 if not hasattr(self, "z2s"):
                     self.z2s = 0.0
 
+            self.betas = np.deg2rad(self.betas)
+
         self.beta = np.deg2rad(self.beta)
-        self.betas = np.deg2rad(self.betas)
 
     def fill_tod(self, obs: Observation, pointings: np.ndarray, hwp_radpsec: float):
 
@@ -318,7 +319,7 @@ class HwpSys:
             # allocate those for "make_bin_map"
             # later filled
             obs.psi = np.empty_like(obs.tod)
-            obs.pixind = np.empty_like(obs.tod, dtype=np.int)
+            obs.pixind = np.empty_like(obs.tod, dtype=int)
 
         for idet in range(obs.n_detectors):
             pix = hp.ang2pix(self.nside, pointings[idet, :, 0], pointings[idet, :, 1])

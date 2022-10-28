@@ -535,8 +535,9 @@ class HwpSysAndBandpass:
 
             self.cmb2bb_solver /= self.cmb2bb_solver.sum()
 
+            self.cbetas = np.cos(np.deg2rad(self.betas))
+
         self.cbeta = np.cos(np.deg2rad(self.beta))
-        self.cbetas = np.cos(np.deg2rad(self.betas))
 
     def fill_tod(self, obs: Observation, pointings: np.ndarray, hwp_radpsec: float):
         """It fills tod and/or A^TA and A^Td for the "on the fly" map production
@@ -559,7 +560,7 @@ class HwpSysAndBandpass:
             # allocate those for "make_bin_map"
             # later filled
             obs.psi = np.empty_like(obs.tod)
-            obs.pixind = np.empty_like(obs.tod, dtype=np.int)
+            obs.pixind = np.empty_like(obs.tod, dtype=int)
 
         for idet in range(obs.n_detectors):
             pix = hp.ang2pix(self.nside, pointings[idet, :, 0], pointings[idet, :, 1])
